@@ -41,6 +41,7 @@ android {
             debuggable = false
         }
         debug {
+            applicationIdSuffix = ".debug"
             debuggable = true
         }
     }
@@ -91,10 +92,10 @@ android {
     productFlavors {
         play {
             dimension "distribution"
-            isDefault = true
         }
         foss {
             dimension "distribution"
+            isDefault = true
             minSdk = 29
         }
     }
@@ -181,3 +182,5 @@ dependencies {
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
 }
+
+apply from: "foss-guard.gradle"

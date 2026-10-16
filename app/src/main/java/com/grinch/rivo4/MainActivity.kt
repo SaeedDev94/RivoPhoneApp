@@ -270,7 +270,7 @@ open class MainActivity : androidx.fragment.app.FragmentActivity() {
                             )
 
                         var showRatePrompt by remember { mutableStateOf(false) }
-                        val rateShown = remember { prefs.getBoolean(PreferenceManager.KEY_RATE_APP_SHOWN, false) }
+                        val rateShown = remember { !com.grinch.rivo4.view.components.ad.IS_ADS_SUPPORTED || prefs.getBoolean(PreferenceManager.KEY_RATE_APP_SHOWN, false) }
 
                         LaunchedEffect(rateShown) {
                             if (!rateShown) {

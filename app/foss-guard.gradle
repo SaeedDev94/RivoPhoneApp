@@ -1,0 +1,69 @@
+// Fails any FOSS build whose runtime classpath contains a tracking, analytics, ads or
+// proprietary Google Play library, e.g. one pulled in by an upstream merge.
+
+def bannedGroups = [
+    // Google proprietary: Play Services, Firebase, Play Core/Billing, ads, ML Kit
+    ~/^com\.google\.android\.gms(\..+)?$/,
+    ~/^com\.google\.firebase(\..+)?$/,
+    ~/^com\.google\.android\.play(\..+)?$/,
+    ~/^com\.google\.android\.ump(\..+)?$/,
+    ~/^com\.google\.android\.libraries(\..+)?$/,
+    ~/^com\.google\.mlkit(\..+)?$/,
+    ~/^com\.google\.ads(\..+)?$/,
+    ~/^com\.android\.billingclient(\..+)?$/,
+    ~/^com\.android\.installreferrer(\..+)?$/,
+    // Analytics, crash reporting, attribution and ad SDKs
+    ~/^com\.crashlytics(\..+)?$/,
+    ~/^io\.fabric(\..+)?$/,
+    ~/^com\.facebook\.android(\..+)?$/,
+    ~/^io\.sentry(\..+)?$/,
+    ~/^com\.bugsnag(\..+)?$/,
+    ~/^com\.microsoft\.appcenter(\..+)?$/,
+    ~/^com\.appsflyer(\..+)?$/,
+    ~/^com\.adjust\.sdk(\..+)?$/,
+    ~/^io\.branch\.sdk(\..+)?$/,
+    ~/^com\.mixpanel(\..+)?$/,
+    ~/^com\.amplitude(\..+)?$/,
+    ~/^com\.segment(\..+)?$/,
+    ~/^com\.flurry(\..+)?$/,
+    ~/^com\.onesignal(\..+)?$/,
+    ~/^com\.yandex\.android(\..+)?$/,
+    ~/^com\.applovin(\..+)?$/,
+    ~/^com\.unity3d\.ads(\..+)?$/,
+    ~/^com\.ironsource(\..+)?$/,
+]
+
+afterEvaluate {
+    configurations.matching { it.name ==~ /foss\w*RuntimeClasspath/ }.each { config ->
+        def variantName = config.name - 'RuntimeClasspath'
+        def rootComponent = config.incoming.resolutionResult.rootComponent
+
+        def checkTask = tasks.register("check${variantName.capitalize()}NoTrackers") {
+            group = 'verification'
+            description = "Fails if ${variantName} depends on a tracking, ads or proprietary Google library."
+            doLast {
+                def seen = [] as Set
+                def queue = [rootComponent.get()]
+                def offenders = [] as SortedSet
+                while (!queue.isEmpty()) {
+                    def component = queue.remove(0)
+                    if (!seen.add(component.id)) continue
+                    def mv = component.moduleVersion
+                    if (mv != null && bannedGroups.any { mv.group ==~ it }) {
+                        offenders << "${mv.group}:${mv.name}:${mv.version}".toString()
+                    }
+                    component.dependencies.each { dep ->
+                        if (dep instanceof ResolvedDependencyResult) {
+                            queue << dep.selected
+                        }
+                    }
+                }
+                if (!offenders.isEmpty()) {
+                    throw new GradleException("Tracking/proprietary libraries found in ${variantName}:\n  " + offenders.join('\n  '))
+                }
+            }
+        }
+
+        tasks.matching { it.name == "pre${variantName.capitalize()}Build" }.configureEach { dependsOn checkTask }
+    }
+}
