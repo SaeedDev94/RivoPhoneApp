@@ -498,13 +498,15 @@ fun SupportDevelopmentScreen(navigator: DestinationsNavigator) {
                 onClick = { showAppIconPicker = false }
             )
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = "Choose the dialer launcher icon and label together. Nothing changes until you confirm and restart Rivo.",
+                    text = "Choose how Rivo appears on your home screen. Changes are staged until you confirm and restart.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 AppIconOptions(
@@ -708,7 +710,7 @@ private fun AppIconOptions(
     isPro: Boolean
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Default icon
@@ -750,7 +752,7 @@ private fun AppIconOption(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
         border = if (isSelected)
             androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
@@ -758,39 +760,41 @@ private fun AppIconOption(
             androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp)
             .clickable(enabled = isEnabled, onClick = onClick),
         contentColor = if (isEnabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
             alpha = 0.38f
         )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 shape = CircleShape,
                 color = if (iconName == "pro") Color.Transparent else MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(52.dp)
+                modifier = Modifier.size(56.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (iconName == "pro") {
                         Image(
                             painter = painterResource(R.drawable.pro_app_icon),
                             contentDescription = null,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(54.dp)
                         )
                     } else {
                         Image(
                             painter = painterResource(R.drawable.logo),
                             contentDescription = null,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(34.dp)
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
                 Text(
                     text = name,
                     style = MaterialTheme.typography.titleSmall,
@@ -804,21 +808,11 @@ private fun AppIconOption(
                     )
                 }
             }
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else if (!isEnabled) {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            RadioButton(
+                selected = isSelected,
+                enabled = isEnabled,
+                onClick = onClick
+            )
         }
     }
 }
