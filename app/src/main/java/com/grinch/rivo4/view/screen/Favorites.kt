@@ -470,24 +470,6 @@ private fun ExpressiveFavoriteCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        modifier = Modifier
-                            .size(76.dp)
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        RivoAvatar(
-                            name = contact.name,
-                            photoUri = contact.photoUri,
-                            textStyle = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape),
-                            shape = CircleShape
-                        )
-                    }
-
                     if (isEditing) {
                         Surface(
                             onClick = onUnfavorite,
@@ -512,6 +494,22 @@ private fun ExpressiveFavoriteCard(
                 }
             }
 
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(84.dp)
+            ) {
+                RivoAvatar(
+                    name = contact.name,
+                    photoUri = contact.photoUri,
+                    textStyle = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape),
+                    shape = CircleShape
+                )
+            }
+
             Text(
                 text = ContactUtils.formatContactName(contact, displayOrder),
                 style = MaterialTheme.typography.titleSmall,
@@ -532,8 +530,9 @@ private fun ExpressiveFavoriteCard(
                     onClick = onCall,
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(rivoCornerDp(12, roundness))),
+                        .height(48.dp)
+                        .weight(1f)
+                        .clip(RoundedCornerShape(rivoCornerDp(16, roundness))),
                     colors = IconButtonDefaults.filledTonalIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -542,8 +541,10 @@ private fun ExpressiveFavoriteCard(
                     Icon(
                         imageVector = Icons.Default.Call,
                         contentDescription = stringResource(R.string.favorites_action_call),
-                        modifier = Modifier.size(17.dp)
+                        modifier = Modifier.size(20.dp)
                     )
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.favorites_action_call))
                 }
 
                 Spacer(Modifier.width(6.dp))
@@ -552,8 +553,9 @@ private fun ExpressiveFavoriteCard(
                     onClick = onMessage,
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(rivoCornerDp(12, roundness))),
+                        .height(48.dp)
+                        .weight(1f)
+                        .clip(RoundedCornerShape(rivoCornerDp(16, roundness))),
                     colors = IconButtonDefaults.filledTonalIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                         contentColor = MaterialTheme.colorScheme.onSurface
@@ -562,8 +564,10 @@ private fun ExpressiveFavoriteCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Message,
                         contentDescription = stringResource(R.string.favorites_action_message),
-                        modifier = Modifier.size(17.dp)
+                        modifier = Modifier.size(20.dp)
                     )
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.favorites_action_message))
                 }
             }
         }
