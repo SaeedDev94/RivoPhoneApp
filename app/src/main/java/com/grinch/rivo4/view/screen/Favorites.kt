@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Add
@@ -306,7 +307,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
 
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Fixed(1),
+            columns = GridCells.Adaptive(minSize = 132.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .then(
@@ -331,7 +332,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
                     }
                 ),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 100.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             itemsIndexed(
@@ -440,7 +441,7 @@ private fun ExpressiveFavoriteCard(
     )
 
     val roundness = LocalCardRoundness.current
-    val cardShape = RoundedCornerShape(rivoCornerDp(28, roundness))
+    val cardShape = RoundedCornerShape(rivoCornerDp(24, roundness))
 
     Card(
         onClick = { if (!isEditing) onOpen() },
@@ -461,57 +462,41 @@ private fun ExpressiveFavoriteCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(horizontal = 10.dp, vertical = 14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.size(76.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RivoAvatar(
-                        name = contact.name,
-                        photoUri = contact.photoUri,
-                        textStyle = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(4.dp).fillMaxSize()
-                    )
-                }
-                Spacer(Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = ContactUtils.formatContactName(contact, displayOrder),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = if (contact.phoneNumbers.isEmpty()) {
-                            stringResource(R.string.favorites_no_number)
-                        } else {
-                            "Favorite contact"
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                if (isEditing) {
                     Surface(
-                        onClick = onUnfavorite,
-                        modifier = Modifier.size(40.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        tonalElevation = 2.dp
+                        shape = RoundedCornerShape(rivoCornerDp(50, roundness)),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier
+                            .size(76.dp)
+                            .align(Alignment.CenterVertically)
+                    ) {
+                        RivoAvatar(
+                            name = contact.name,
+                            photoUri = contact.photoUri,
+                            textStyle = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier
+                                .padding(3.dp)
+                                .fillMaxSize()
+                        )
+                    }
+
+                    if (isEditing) {
+                        Surface(
+                            onClick = onUnfavorite,
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(30.dp),
+                            shape = RoundedCornerShape(rivoCornerDp(12, roundness)),
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                            tonalElevation = 2.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
@@ -522,34 +507,33 @@ private fun ExpressiveFavoriteCard(
                         }
                     }
                 } else {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(9.dp)
-                        )
-                    }
+                    Spacer(Modifier.width(30.dp))
                 }
             }
 
+            Text(
+                text = ContactUtils.formatContactName(contact, displayOrder),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                minLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                FilledTonalButton(
+                FilledTonalIconButton(
                     onClick = onCall,
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(rivoCornerDp(12, roundness))),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -557,21 +541,19 @@ private fun ExpressiveFavoriteCard(
                     Icon(
                         imageVector = Icons.Default.Call,
                         contentDescription = stringResource(R.string.favorites_action_call),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(17.dp)
                     )
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.favorites_action_call))
                 }
 
-                FilledTonalButton(
+                Spacer(Modifier.width(6.dp))
+
+                FilledTonalIconButton(
                     onClick = onMessage,
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(rivoCornerDp(12, roundness))),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                         contentColor = MaterialTheme.colorScheme.onSurface
                     )
@@ -579,10 +561,8 @@ private fun ExpressiveFavoriteCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Message,
                         contentDescription = stringResource(R.string.favorites_action_message),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(17.dp)
                     )
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.favorites_action_message))
                 }
             }
         }
