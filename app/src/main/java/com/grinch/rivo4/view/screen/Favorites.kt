@@ -306,7 +306,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
 
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(1),
             modifier = Modifier
                 .fillMaxSize()
                 .then(
@@ -331,7 +331,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
                     }
                 ),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 100.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             itemsIndexed(
@@ -440,13 +440,17 @@ private fun ExpressiveFavoriteCard(
     )
 
     val roundness = LocalCardRoundness.current
-    val cardShape = RoundedCornerShape(rivoCornerDp(20, roundness))
+    val cardShape = RoundedCornerShape(rivoCornerDp(28, roundness))
 
     Card(
         onClick = { if (!isEditing) onOpen() },
         shape = cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 6.dp
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -457,27 +461,33 @@ private fun ExpressiveFavoriteCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RivoAvatar(
-                    name = contact.name,
-                    photoUri = contact.photoUri,
-                    textStyle = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.size(64.dp)
-                )
-                Spacer(Modifier.width(12.dp))
+                Surface(
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(76.dp)
+                ) {
+                    RivoAvatar(
+                        name = contact.name,
+                        photoUri = contact.photoUri,
+                        textStyle = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(4.dp).fillMaxSize()
+                    )
+                }
+                Spacer(Modifier.width(16.dp))
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = ContactUtils.formatContactName(contact, displayOrder),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -497,11 +507,11 @@ private fun ExpressiveFavoriteCard(
                 if (isEditing) {
                     Surface(
                         onClick = onUnfavorite,
-                        modifier = Modifier.size(30.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError,
-                        shadowElevation = 2.dp
+                        modifier = Modifier.size(40.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        tonalElevation = 2.dp
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
@@ -512,16 +522,20 @@ private fun ExpressiveFavoriteCard(
                         }
                     }
                 } else {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.padding(9.dp)
+                        )
+                    }
                 }
             }
-
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -532,9 +546,9 @@ private fun ExpressiveFavoriteCard(
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(40.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -554,9 +568,9 @@ private fun ExpressiveFavoriteCard(
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(40.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp),
+                        .height(48.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                         contentColor = MaterialTheme.colorScheme.onSurface
