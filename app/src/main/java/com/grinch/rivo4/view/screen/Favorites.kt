@@ -307,7 +307,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
 
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Adaptive(minSize = 132.dp),
+            columns = GridCells.Adaptive(minSize = 104.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .then(
@@ -471,7 +471,7 @@ private fun ExpressiveFavoriteCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(rivoCornerDp(50, roundness)),
+                        shape = CircleShape,
                         color = MaterialTheme.colorScheme.primaryContainer,
                         modifier = Modifier
                             .size(76.dp)
@@ -482,8 +482,9 @@ private fun ExpressiveFavoriteCard(
                             photoUri = contact.photoUri,
                             textStyle = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier
-                                .padding(3.dp)
                                 .fillMaxSize()
+                                .clip(CircleShape),
+                            shape = CircleShape
                         )
                     }
 
