@@ -442,6 +442,7 @@ private fun ExpressiveFavoriteCard(
 
     val roundness = LocalCardRoundness.current
     val cardShape = RoundedCornerShape(rivoCornerDp(24, roundness))
+    val avatarShape = RoundedCornerShape(rivoCornerDp(24, roundness))
 
     Card(
         onClick = { if (!isEditing) onOpen() },
@@ -495,7 +496,7 @@ private fun ExpressiveFavoriteCard(
             }
 
             Surface(
-                shape = CircleShape,
+                shape = avatarShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier.size(84.dp)
             ) {
@@ -505,8 +506,8 @@ private fun ExpressiveFavoriteCard(
                     textStyle = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(CircleShape),
-                    shape = CircleShape
+                        .clip(avatarShape),
+                    shape = avatarShape
                 )
             }
 
