@@ -544,8 +544,6 @@ private fun ExpressiveFavoriteCard(
                         contentDescription = stringResource(R.string.favorites_action_call),
                         modifier = Modifier.size(20.dp)
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.favorites_action_call))
                 }
 
                 Spacer(Modifier.width(6.dp))
@@ -567,8 +565,6 @@ private fun ExpressiveFavoriteCard(
                         contentDescription = stringResource(R.string.favorites_action_message),
                         modifier = Modifier.size(20.dp)
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.favorites_action_message))
                 }
             }
         }
