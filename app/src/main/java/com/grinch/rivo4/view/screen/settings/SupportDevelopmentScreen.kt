@@ -217,7 +217,18 @@ fun SupportDevelopmentScreen(navigator: DestinationsNavigator) {
                             showAppIconPicker = true
                         }
                     )
-                    ProPerkRow("Choose the dialer launcher name with the icon", Icons.Default.TextFields, shouldBePro)
+                    Button(
+                        onClick = {
+                            pendingAppIcon = selectedAppIcon
+                            showAppIconPicker = true
+                        },
+                        enabled = shouldBePro,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Apps, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (shouldBePro) "Choose icon & label" else "Unlock Pro to choose icon & label")
+                    }
                     Text(
                         if (canUseProFeatures) {
                             "Watch a video for one day of Pro, even with ads disabled. Keep non-intrusive ads enabled for ongoing access, or tip once on Google Play for permanent Pro."
