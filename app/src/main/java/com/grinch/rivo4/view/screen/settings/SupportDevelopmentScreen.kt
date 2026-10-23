@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -715,7 +716,7 @@ private fun AppIconOptions(
     ) {
         // Default icon
         AppIconOption(
-            name = "Default icon and Rivo label",
+            name = "Rivo",
             iconName = "default",
             isSelected = selectedIcon == "default",
             isEnabled = true,
@@ -725,7 +726,7 @@ private fun AppIconOptions(
         // Pro icon (only if pro)
         if (isPro) {
             AppIconOption(
-                name = "Golden icon and Rivo Pro label",
+                name = "Rivo Pro",
                 iconName = "pro",
                 isSelected = selectedIcon == "pro",
                 isEnabled = true,
@@ -733,7 +734,7 @@ private fun AppIconOptions(
             )
         } else {
             AppIconOption(
-                name = "Golden icon and Rivo Pro label (locked)",
+                name = "Rivo Pro",
                 iconName = "pro",
                 isSelected = false,
                 isEnabled = false,
@@ -779,13 +780,20 @@ private fun AppIconOption(
                         Image(
                             painter = painterResource(R.drawable.pro_app_icon),
                             contentDescription = null,
-                            modifier = Modifier.size(54.dp)
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
                         )
                     } else {
                         Image(
                             painter = painterResource(R.drawable.logo),
                             contentDescription = null,
-                            modifier = Modifier.size(34.dp)
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(10.dp)
+                                .clip(CircleShape)
                         )
                     }
                 }
