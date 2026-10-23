@@ -66,6 +66,7 @@ import com.grinch.rivo4.controller.util.formatPhoneNumber
 import com.grinch.rivo4.modal.data.Contact
 import com.grinch.rivo4.view.components.PermissionDeniedView
 import com.grinch.rivo4.view.components.RivoAvatar
+import com.grinch.rivo4.view.components.RivoSelectionDialog
 import com.grinch.rivo4.view.components.TopBar
 import com.grinch.rivo4.view.components.rememberCallLauncher
 import com.grinch.rivo4.view.components.rememberGridDragDropState
@@ -132,6 +133,26 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
     val view = LocalView.current
     val context = LocalContext.current
     var showAddSheet by remember { mutableStateOf(false) }
+    var numberSelection by remember { mutableStateOf<NumberSelection?>(null) }
+
+    fun performAction(contact: Contact, number: String, action: FavoriteAction) {
+        when (action) {
+            FavoriteAction.CALL -> {
+                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                callLauncher.dial(number, contact)
+            }
+            FavoriteAction.MESSAGE -> SocialUtils.openSms(context, number)
+        }
+    }
+
+    fun requestAction(contact: Contact, action: FavoriteAction) {
+        val numbers = contact.phoneNumbers.filter { it.isNotBlank() }
+        when {
+            numbers.isEmpty() -> Unit
+            numbers.size == 1 -> performAction(contact, numbers.first(), action)
+            else -> numberSelection = NumberSelection(contact, action)
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (allContacts.isEmpty()) {
@@ -345,17 +366,31 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
                     onOpen = {
                         navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
                     },
-                    onCall = {
-                        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                        callLauncher.dial(contact.phoneNumbers.firstOrNull() ?: "", contact)
-                    },
-                    onMessage = {
-                        val phone = contact.phoneNumbers.firstOrNull() ?: ""
-                        if (phone.isNotBlank()) SocialUtils.openSms(context, phone)
-                    }
+                    onCall = { requestAction(contact, FavoriteAction.CALL) },
+                    onMessage = { requestAction(contact, FavoriteAction.MESSAGE) }
                 )
             }
         }
+    }
+
+    numberSelection?.let { selection ->
+        RivoSelectionDialog(
+            onDismissRequest = { numberSelection = null },
+            title = "Choose a number",
+            items = selection.contact.phoneNumbers.filter { it.isNotBlank() },
+            itemLabel = ::formatPhoneNumber,
+            itemSupporting = { selection.contact.name },
+            itemIcon = {
+                when (selection.action) {
+                    FavoriteAction.CALL -> Icons.Default.Call
+                    FavoriteAction.MESSAGE -> Icons.AutoMirrored.Filled.Message
+                }
+            },
+            onItemSelected = { number ->
+                numberSelection = null
+                performAction(selection.contact, number, selection.action)
+            }
+        )
     }
 
     if (showAddSheet) {
@@ -370,6 +405,16 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
         )
     }
 }
+
+private enum class FavoriteAction {
+    CALL,
+    MESSAGE
+}
+
+private data class NumberSelection(
+    val contact: Contact,
+    val action: FavoriteAction
+)
 
 @Composable
 private fun ExpressiveFavoriteCard(
@@ -413,25 +458,46 @@ private fun ExpressiveFavoriteCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Box(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 RivoAvatar(
                     name = contact.name,
                     photoUri = contact.photoUri,
-                    textStyle = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.size(54.dp)
+                    textStyle = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.size(64.dp)
                 )
+                Spacer(Modifier.width(12.dp))
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = ContactUtils.formatContactName(contact, displayOrder),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = if (contact.phoneNumbers.isEmpty()) {
+                            stringResource(R.string.favorites_no_number)
+                        } else {
+                            "Favorite contact"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
 
                 if (isEditing) {
                     Surface(
                         onClick = onUnfavorite,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .size(26.dp),
+                        modifier = Modifier.size(30.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.error,
                         contentColor = MaterialTheme.colorScheme.onError,
@@ -445,32 +511,17 @@ private fun ExpressiveFavoriteCard(
                             )
                         }
                     }
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
-
-            Text(
-                text = ContactUtils.formatContactName(contact, displayOrder),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            val primaryPhone = contact.phoneNumbers.firstOrNull() ?: ""
-            Text(
-                text = if (primaryPhone.isNotBlank()) formatPhoneNumber(primaryPhone) else stringResource(R.string.favorites_no_number),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(Modifier.height(12.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -478,10 +529,10 @@ private fun ExpressiveFavoriteCard(
             ) {
                 FilledTonalButton(
                     onClick = onCall,
-                    enabled = !isEditing && primaryPhone.isNotBlank(),
+                    enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(36.dp),
+                        .height(40.dp),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 4.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(
@@ -494,14 +545,16 @@ private fun ExpressiveFavoriteCard(
                         contentDescription = stringResource(R.string.favorites_action_call),
                         modifier = Modifier.size(16.dp)
                     )
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.favorites_action_call))
                 }
 
                 FilledTonalButton(
                     onClick = onMessage,
-                    enabled = !isEditing && primaryPhone.isNotBlank(),
+                    enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(36.dp),
+                        .height(40.dp),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 4.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(
@@ -514,6 +567,8 @@ private fun ExpressiveFavoriteCard(
                         contentDescription = stringResource(R.string.favorites_action_message),
                         modifier = Modifier.size(16.dp)
                     )
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.favorites_action_message))
                 }
             }
         }
