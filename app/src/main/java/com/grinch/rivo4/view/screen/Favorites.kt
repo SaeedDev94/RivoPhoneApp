@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
@@ -45,7 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,7 +60,6 @@ import com.grinch.rivo4.R
 import com.grinch.rivo4.controller.ContactsViewModel
 import com.grinch.rivo4.controller.util.ContactUtils
 import com.grinch.rivo4.controller.util.PreferenceManager
-import com.grinch.rivo4.controller.util.SocialUtils
 import com.grinch.rivo4.controller.util.formatPhoneNumber
 import com.grinch.rivo4.modal.data.Contact
 import com.grinch.rivo4.view.components.PermissionDeniedView
@@ -132,18 +129,12 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
     val callLauncher = rememberCallLauncher()
     val gridState = rememberLazyGridState()
     val view = LocalView.current
-    val context = LocalContext.current
     var showAddSheet by remember { mutableStateOf(false) }
     var numberSelection by remember { mutableStateOf<NumberSelection?>(null) }
 
     fun performAction(contact: Contact, number: String, action: FavoriteAction) {
-        when (action) {
-            FavoriteAction.CALL -> {
-                view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                callLauncher.dial(number, contact)
-            }
-            FavoriteAction.MESSAGE -> SocialUtils.openSms(context, number)
-        }
+        view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        callLauncher.dial(number, contact)
     }
 
     fun requestAction(contact: Contact, action: FavoriteAction) {
@@ -368,7 +359,6 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
                         navigator.navigate(ContactDetailsScreenDestination(contactId = contact.id))
                     },
                     onCall = { requestAction(contact, FavoriteAction.CALL) },
-                    onMessage = { requestAction(contact, FavoriteAction.MESSAGE) }
                 )
             }
         }
@@ -381,12 +371,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
             items = selection.contact.phoneNumbers.filter { it.isNotBlank() },
             itemLabel = ::formatPhoneNumber,
             itemSupporting = { selection.contact.name },
-            itemIcon = {
-                when (selection.action) {
-                    FavoriteAction.CALL -> Icons.Default.Call
-                    FavoriteAction.MESSAGE -> Icons.AutoMirrored.Filled.Message
-                }
-            },
+            itemIcon = { Icons.Default.Call },
             onItemSelected = { number ->
                 numberSelection = null
                 performAction(selection.contact, number, selection.action)
@@ -408,8 +393,7 @@ private fun FavoritesGridContent(navigator: DestinationsNavigator) {
 }
 
 private enum class FavoriteAction {
-    CALL,
-    MESSAGE
+    CALL
 }
 
 private data class NumberSelection(
@@ -426,7 +410,6 @@ private fun ExpressiveFavoriteCard(
     onUnfavorite: () -> Unit,
     onOpen: () -> Unit,
     onCall: () -> Unit,
-    onMessage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "favoriteWiggle")
@@ -531,7 +514,7 @@ private fun ExpressiveFavoriteCard(
                     onClick = onCall,
                     enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
                     modifier = Modifier
-                        .height(48.dp)
+                        .height(40.dp)
                         .weight(1f)
                         .clip(RoundedCornerShape(rivoCornerDp(16, roundness))),
                     colors = IconButtonDefaults.filledTonalIconButtonColors(
@@ -546,26 +529,6 @@ private fun ExpressiveFavoriteCard(
                     )
                 }
 
-                Spacer(Modifier.width(6.dp))
-
-                FilledTonalIconButton(
-                    onClick = onMessage,
-                    enabled = !isEditing && contact.phoneNumbers.any { it.isNotBlank() },
-                    modifier = Modifier
-                        .height(48.dp)
-                        .weight(1f)
-                        .clip(RoundedCornerShape(rivoCornerDp(16, roundness))),
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Message,
-                        contentDescription = stringResource(R.string.favorites_action_message),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
             }
         }
     }
